@@ -15,13 +15,13 @@ for count in range(2):
     if count == 0:
         train_set_name = 'train_1.csv'
         test_set_name = 'test_with_label_1.csv'
-        output_file_name = 'PER-DS1.csv'
+        output_file_name = 'GNB-DS1.csv'
         class_size = 26
         dataset_size = 80
     else:
         train_set_name = 'train_2.csv'
         test_set_name = 'test_with_label_2.csv'
-        output_file_name = 'PER-DS2.csv'
+        output_file_name = 'GNB-DS2.csv'
         class_size = 10
         dataset_size = 520
 
@@ -57,8 +57,8 @@ for count in range(2):
         testLabels = np.array(letters2)
         testLabels = testLabels.astype(np.float64)
 
-        # Perceptron
-        clf = Perceptron(tol=1e-3, random_state=0)
+        # GaussianNB
+        clf = GaussianNB()
         clf.fit(trainFeatures, trainLabels)
         prediction = clf.predict(testFeatures)
 
