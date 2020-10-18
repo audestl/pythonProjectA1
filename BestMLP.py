@@ -131,4 +131,4 @@ for count in range(2):
         output_writer.writerow("")
         output_writer.writerow(("Weighted-average F1-measure", np.around(f1_weighted, 3)))
         output_writer.writerow("")
-        output_writer.writerow(("Best hyper parameter values:", clf_cv.best_params_))
+        output_writer.writerow(("Best hyper parameter values: ", clf_cv.best_params_))

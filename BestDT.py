@@ -87,7 +87,7 @@ for count in range(2):
 
         # Best Decision Tree
         clf = tree.DecisionTreeClassifier()
-        clf_cv = GridSearchCV(clf, hyperParams, cv=10)
+        clf_cv = GridSearchCV(clf, hyperParams, cv=5, n_jobs=-1)
         clf_cv.fit(trainFeatures, trainLabels)
         print(clf_cv.best_params_)
         print(clf_cv.best_score_)
@@ -132,3 +132,5 @@ for count in range(2):
         output_writer.writerow(("Macro-average F1-measure", np.around(f1_macro, 3)))
         output_writer.writerow("")
         output_writer.writerow(("Weighted-average F1-measure", np.around(f1_weighted, 3)))
+        output_writer.writerow("")
+        output_writer.writerow(("Best hyper parameter values: ", clf_cv.best_params_))
