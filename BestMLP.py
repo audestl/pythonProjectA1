@@ -1,4 +1,3 @@
-
 import sklearn
 import numpy as np
 from sklearn import datasets, svm, metrics
@@ -8,6 +7,8 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_digits
 from sklearn.linear_model import Perceptron
+from sklearn import tree
+from sklearn.model_selection import GridSearchCV
 from sklearn.neural_network import MLPClassifier
 import csv
 
@@ -15,15 +16,19 @@ for count in range(2):
 
     if count == 0:
         train_set_name = 'train_1.csv'
+        validation_set_name = 'val_1.csv'
         test_set_name = 'test_with_label_1.csv'
-        output_file_name = 'Base-MLP-DS1.csv'
+        output_file_name = 'Best-MLP-DS1.csv'
         class_size = 26
+        validation_size = 239
         dataset_size = 80
     else:
         train_set_name = 'train_2.csv'
+        validation_set_name = 'val_2.csv'
         test_set_name = 'test_with_label_2.csv'
-        output_file_name = 'Base-MLP-DS2.csv'
+        output_file_name = 'Best-MLP-DS2.csv'
         class_size = 10
+        validation_size = 1560
         dataset_size = 520
 
     with open(train_set_name) as csvfile:
@@ -37,7 +42,7 @@ for count in range(2):
         #     print(row)
         # print("List of outcomes: ", letters)
 
-    with open(test_set_name) as csvfile:
+    with open(validation_set_name) as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
         features2 = []
         letters2 = []
@@ -48,33 +53,57 @@ for count in range(2):
         #     print(row)
         # print("List of outcomes: ", letters2)
 
+    with open(test_set_name) as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        features3 = []
+        letters3 = []
+        for row in readCSV:
+            features3.append(row[:-1])
+            letters3.append(row[-1])
+        # for row in features3:
+        #     print(row)
+        # print("List of outcomes: ", letters3)
+
         trainFeatures = np.array(features)
         trainFeatures = trainFeatures.astype(np.float64)
         trainLabels = np.array(letters)
         trainLabels = trainLabels.astype(np.float64)
 
-        testFeatures = np.array(features2)
+        validateFeatures = np.array(features2)
+        validateFeatures = validateFeatures.astype(np.float64)
+        validateLabels = np.array(letters2)
+        validateLabels = validateLabels.astype(np.float64)
+
+        testFeatures = np.array(features3)
         testFeatures = testFeatures.astype(np.float64)
-        testLabels = np.array(letters2)
+        testLabels = np.array(letters3)
         testLabels = testLabels.astype(np.float64)
 
-        # Base MLP
-        clf = MLPClassifier(hidden_layer_sizes=(100,), activation='logistic', solver='sgd')
-        clf.fit(trainFeatures, trainLabels)
-        prediction = clf.predict(testFeatures)
+        hyperParams = {"activation": ['identity', 'logistic', 'tanh', 'relu'],
+                       "hidden_layer_sizes": [(30, 50), (10, 10)],
+                       "solver": ['adam', 'sgd']}
 
-        precision = precision_score(testLabels, prediction, average =None)
-        recall = recall_score(testLabels, prediction, average =None)
-        f1 = f1_score(testLabels, prediction, average =None)
+        # Best MLP
+        clf = MLPClassifier()
+        clf_cv = GridSearchCV(clf, hyperParams, cv=5, n_jobs=-1)
+        clf_cv.fit(trainFeatures, trainLabels)
+        print(clf_cv.best_params_)
+        print(clf_cv.best_score_)
+
+        prediction = clf_cv.predict(testFeatures)
+
+        precision = precision_score(testLabels, prediction, average=None)
+        recall = recall_score(testLabels, prediction, average=None)
+        f1 = f1_score(testLabels, prediction, average=None)
         accuracy = accuracy_score(testLabels, prediction)
-        f1_macro = f1_score(testLabels, prediction, average ='macro')
-        f1_weighted = f1_score(testLabels, prediction, average ='weighted')
+        f1_macro = f1_score(testLabels, prediction, average='macro')
+        f1_weighted = f1_score(testLabels, prediction, average='weighted')
 
     # -----------------OUTPUT-----------------------
 
     # Confusion matrix
     np.savetxt(output_file_name, confusion_matrix(testLabels, prediction), delimiter=",", fmt='%d')
-    #print(testLabels)
+    # print(testLabels)
 
     with open(output_file_name, mode='r+', newline='') as output_file:
         output_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -101,3 +130,5 @@ for count in range(2):
         output_writer.writerow(("Macro-average F1-measure", np.around(f1_macro, 3)))
         output_writer.writerow("")
         output_writer.writerow(("Weighted-average F1-measure", np.around(f1_weighted, 3)))
+        output_writer.writerow("")
+        output_writer.writerow(("Best hyper parameter values:", clf_cv.best_params_))

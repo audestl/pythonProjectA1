@@ -8,22 +8,27 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_digits
 from sklearn.linear_model import Perceptron
-from sklearn.neural_network import MLPClassifier
+from sklearn import tree
+from sklearn.model_selection import GridSearchCV
 import csv
 
 for count in range(2):
 
     if count == 0:
         train_set_name = 'train_1.csv'
+        validation_set_name = 'val_1.csv'
         test_set_name = 'test_with_label_1.csv'
-        output_file_name = 'Base-MLP-DS1.csv'
+        output_file_name = 'Best-DT-DS1.csv'
         class_size = 26
+        validation_size = 239
         dataset_size = 80
     else:
         train_set_name = 'train_2.csv'
+        validation_set_name = 'val_2.csv'
         test_set_name = 'test_with_label_2.csv'
-        output_file_name = 'Base-MLP-DS2.csv'
+        output_file_name = 'Best-DT-DS2.csv'
         class_size = 10
+        validation_size = 1560
         dataset_size = 520
 
     with open(train_set_name) as csvfile:
@@ -37,7 +42,7 @@ for count in range(2):
         #     print(row)
         # print("List of outcomes: ", letters)
 
-    with open(test_set_name) as csvfile:
+    with open(validation_set_name) as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
         features2 = []
         letters2 = []
@@ -48,20 +53,46 @@ for count in range(2):
         #     print(row)
         # print("List of outcomes: ", letters2)
 
+    with open(test_set_name) as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        features3 = []
+        letters3 = []
+        for row in readCSV:
+            features3.append(row[:-1])
+            letters3.append(row[-1])
+        # for row in features3:
+        #     print(row)
+        # print("List of outcomes: ", letters3)
+
         trainFeatures = np.array(features)
         trainFeatures = trainFeatures.astype(np.float64)
         trainLabels = np.array(letters)
         trainLabels = trainLabels.astype(np.float64)
 
-        testFeatures = np.array(features2)
+        validateFeatures = np.array(features2)
+        validateFeatures = validateFeatures.astype(np.float64)
+        validateLabels = np.array(letters2)
+        validateLabels = validateLabels.astype(np.float64)
+
+        testFeatures = np.array(features3)
         testFeatures = testFeatures.astype(np.float64)
-        testLabels = np.array(letters2)
+        testLabels = np.array(letters3)
         testLabels = testLabels.astype(np.float64)
 
-        # Base MLP
-        clf = MLPClassifier(hidden_layer_sizes=(100,), activation='logistic', solver='sgd')
-        clf.fit(trainFeatures, trainLabels)
-        prediction = clf.predict(testFeatures)
+        hyperParams = {"criterion": ["gini", "entropy"],
+                       "max_depth": [10, None],
+                       "min_samples_split": [2, 3, 4, 5],
+                       "min_impurity_decrease": [0.0, 0.01, 0.001, 0.0001],
+                       "class_weight": [None, "balanced"]}
+
+        # Best Decision Tree
+        clf = tree.DecisionTreeClassifier()
+        clf_cv = GridSearchCV(clf, hyperParams, cv=10)
+        clf_cv.fit(trainFeatures, trainLabels)
+        print(clf_cv.best_params_)
+        print(clf_cv.best_score_)
+
+        prediction = clf_cv.predict(testFeatures)
 
         precision = precision_score(testLabels, prediction, average =None)
         recall = recall_score(testLabels, prediction, average =None)
