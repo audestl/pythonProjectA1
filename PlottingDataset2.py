@@ -21,6 +21,6 @@ for cell in range(len(character)):
 
 
 plt.bar(value, characterClass)
-plt.ylabel('Number of occurrence of the letter')
-plt.xlabel('All the letters indices')
+plt.ylabel('Number of instances')
+plt.xlabel('Letters index')
 plt.show()
