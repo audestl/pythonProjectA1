@@ -1,13 +1,6 @@
-
-import sklearn
 import numpy as np
-from sklearn import datasets, svm, metrics
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, accuracy_score
-
 from sklearn.naive_bayes import GaussianNB
-from sklearn.model_selection import train_test_split
-from sklearn.datasets import load_digits
-from sklearn.linear_model import Perceptron
 import csv
 
 for count in range(2):
@@ -32,9 +25,6 @@ for count in range(2):
         for row in readCSV:
             features.append(row[:-1])
             letters.append(row[-1])
-        # for row in features:
-        #     print(row)
-        # print("List of outcomes: ", letters)
 
     with open(test_set_name) as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
@@ -43,9 +33,6 @@ for count in range(2):
         for row in readCSV:
             features2.append(row[:-1])
             letters2.append(row[-1])
-        # for row in features2:
-        #     print(row)
-        # print("List of outcomes: ", letters2)
 
         trainFeatures = np.array(features)
         trainFeatures = trainFeatures.astype(np.float64)
@@ -62,18 +49,18 @@ for count in range(2):
         clf.fit(trainFeatures, trainLabels)
         prediction = clf.predict(testFeatures)
 
-        precision = precision_score(testLabels, prediction, average =None)
-        recall = recall_score(testLabels, prediction, average =None)
-        f1 = f1_score(testLabels, prediction, average =None)
+        # Evaluation
+        precision = precision_score(testLabels, prediction, average =None, zero_division=0)
+        recall = recall_score(testLabels, prediction, average =None, zero_division=0)
+        f1 = f1_score(testLabels, prediction, average =None, zero_division=0)
         accuracy = accuracy_score(testLabels, prediction)
-        f1_macro = f1_score(testLabels, prediction, average ='macro')
-        f1_weighted = f1_score(testLabels, prediction, average ='weighted')
+        f1_macro = f1_score(testLabels, prediction, average ='macro', zero_division=0)
+        f1_weighted = f1_score(testLabels, prediction, average ='weighted', zero_division=0)
 
     # -----------------OUTPUT-----------------------
 
     # Confusion matrix
     np.savetxt(output_file_name, confusion_matrix(testLabels, prediction), delimiter=",", fmt='%d')
-    #print(testLabels)
 
     with open(output_file_name, mode='r+', newline='') as output_file:
         output_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
