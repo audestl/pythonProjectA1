@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, accuracy_score
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, PredefinedSplit
 from sklearn.neural_network import MLPClassifier
 import csv
 
@@ -65,6 +65,8 @@ for count in range(2):
         hyperParams = {"activation": ['identity', 'logistic', 'tanh', 'relu'],
                        "hidden_layer_sizes": [(30, 50), (10, 10, 10)],
                        "solver": ['adam', 'sgd']}
+
+        # ps = PredefinedSplit(test_fold=validateLabels)
 
         # Best MLP
         clf = MLPClassifier()

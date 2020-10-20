@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, accuracy_score
 from sklearn import tree
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, PredefinedSplit
 import csv
 
 for count in range(2):
@@ -67,6 +67,8 @@ for count in range(2):
                        "min_samples_split": [2, 3, 4, 5],
                        "min_impurity_decrease": [0.0, 0.01, 0.001, 0.0001],
                        "class_weight": [None, "balanced"]}
+
+        # ps = PredefinedSplit(test_fold=validateLabels)
 
         # Best Decision Tree
         clf = tree.DecisionTreeClassifier()
